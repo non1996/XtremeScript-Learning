@@ -18,7 +18,7 @@ void LexerStateFloat::HandleChar(Lexer* _lexer)
 	if (_lexer->IsCurrCharNumeric())
 	{
 	}
-	else if (_lexer->IsCurrCharWhiteSpace())
+	else if (_lexer->IsCurrCharWhiteSpace() || _lexer->IsCurrCharDelim())
 	{
 		_lexer->CurrLexemeFinish();
 	}
@@ -28,9 +28,9 @@ void LexerStateFloat::HandleChar(Lexer* _lexer)
 	}
 }
 
-Token LexerStateFloat::GetTokenType()
+Token LexerStateFloat::GetTokenType(Lexer* _lexer)
 {
-	return Lexer::TOKEN_TYPE_FLOAT;
+	return Token::TOKEN_TYPE_FLOAT;
 }
 
 LexerStateFloat * LexerStateFloat::GetInstance()

@@ -1,8 +1,13 @@
 #include "stdafx.h"
-#include "LexerStateStart.h"
+
 #include "Lexer.h"
+#include "LexerStateStart.h"
 #include "LexerStateInt.h"
 #include "LexerStateFloat.h"
+#include "LexerStateIdent.h"
+#include "LexerStateDelim.h"
+#include "LexerStateString.h"
+#include "LexerStateOp.h"
 
 LexerStateStart* LexerStateStart::_instance = nullptr;
 
@@ -28,15 +33,33 @@ void LexerStateStart::HandleChar(Lexer* _lexer)
 	{
 		ChangeState(_lexer, LexerStateFloat::GetInstance());
 	}
+	else if (_lexer->IsCurrCharIdent())
+	{
+		ChangeState(_lexer, LexerStateIdent::GetInstance());
+	}
+	else if (_lexer->IsCurrCharDelim())
+	{
+		ChangeState(_lexer, LexerStateDelim::GetInstance());
+	}
+	else if (_lexer->IsCurrCharOpChar())
+	{
+		_lexer->InitAnalyseOpChar();
+		ChangeState(_lexer, LexerStateOp::GetInstance());
+	}
+	else if (_lexer->IsCurrCharQuote())
+	{
+		_lexer->AddCurrChar(false);								//收到引号进入接收字符串状态，且不把引号加入字符串
+		ChangeState(_lexer, LexerStateString::GetInstance());
+	}
 	else
 	{
 		_lexer->ExitOnInvalidInputError();
 	}
 }
 
-Token LexerStateStart::GetTokenType()
+Token LexerStateStart::GetTokenType(Lexer* _lexer)
 {
-	return Lexer::TOKEN_TYPE_END_OF_STREAM;
+	return Token::TOKEN_TYPE_END_OF_STREAM;
 }
 
 LexerStateStart * LexerStateStart::GetInstance()

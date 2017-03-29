@@ -22,7 +22,7 @@ void LexerStateInt::HandleChar(Lexer* _lexer)
 	{
 		ChangeState(_lexer, LexerStateFloat::GetInstance());
 	}
-	else if (_lexer->IsCurrCharWhiteSpace())
+	else if (_lexer->IsCurrCharWhiteSpace() || _lexer->IsCurrCharDelim())
 	{
 		_lexer->CurrLexemeFinish();
 	}
@@ -32,9 +32,9 @@ void LexerStateInt::HandleChar(Lexer* _lexer)
 	}
 }
 
-Token LexerStateInt::GetTokenType()
+Token LexerStateInt::GetTokenType(Lexer* _lexer)
 {
-	return Lexer::TOKEN_TYPE_INT;
+	return Token::TOKEN_TYPE_INT;
 }
 
 LexerStateInt * LexerStateInt::GetInstance()

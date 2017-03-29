@@ -1,6 +1,8 @@
 #pragma once
 #include "LexerState.h"
 
+#include "Token.h"
+
 class LexerStateStart :
 	public LexerState
 {
@@ -14,7 +16,7 @@ public:
 
 	virtual void HandleChar(Lexer* _lexer);
 
-	virtual Token GetTokenType();
+	virtual Token GetTokenType(Lexer* _lexer);
 
 	static LexerStateStart* GetInstance();
 };

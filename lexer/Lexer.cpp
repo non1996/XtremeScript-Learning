@@ -98,6 +98,41 @@ bool Lexer::IsCurrCharPoint()
 	return cCurrChar == '.';
 }
 
+bool Lexer::IsCurrCharIdent()
+{
+	return (cCurrChar >= '0' && cCurrChar <= '9') ||
+			(cCurrChar >= 'A' && cCurrChar <= 'Z') ||
+			(cCurrChar >= 'a' && cCurrChar <= 'z') ||
+			cCurrChar == '_';
+}
+
+bool Lexer::IsCurrCharDelim()
+{
+	for (auto iter = validDelimes.begin(); iter != validDelimes.end(); ++iter)
+	{
+		if (cCurrChar == *iter)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Lexer::IsCurrCharQuote()
+{
+	return cCurrChar == '"';
+}
+
+bool Lexer::IsCurrCharEscape()
+{
+	return cCurrChar == '\\';
+}
+
+bool Lexer::IsCurrCharOpChar()
+{
+	return _opStates.IsCharOpChar(cCurrChar, _opCharAnalyser.GetCurrOpCharIndex());
+}
+
 Token Lexer::GetNextToken()
 {
 	CurrLexemeInit();
@@ -105,7 +140,7 @@ Token Lexer::GetNextToken()
 	//如果已经到了文件结尾，就返回流结束属性符
 	if (m_iCurrLexemeStart >= (int)strlen(g_pstrSource.get()))
 	{
-		return TOKEN_TYPE_END_OF_STREAM;
+		return Token::TOKEN_TYPE_END_OF_STREAM;
 	}
 
 	while (true)
@@ -137,7 +172,8 @@ Token Lexer::GetNextToken()
 
 void Lexer::ExitOnInvalidInputError()
 {
-	cout << "Error: '" << cCurrChar << "' unexpected." << endl;
+	cout << "Error: '" << cCurrChar << "' unexpected." << endl << endl;
+	system("pause");
 	exit(0);
 }
 
@@ -168,7 +204,6 @@ void Lexer::CurrLexemeInit()
 	g_strCurrLexeme.clear();
 
 	iLexemeDone = false;
-
 }
 
 void Lexer::AddCharToLexeme()
@@ -181,7 +216,7 @@ void Lexer::AddCharToLexeme()
 
 Token Lexer::GetTokenType()
 {
-	return iCurrLexState->GetTokenType();
+	return iCurrLexState->GetTokenType(this);
 }
 
 void Lexer::HandleChar()
@@ -194,10 +229,44 @@ void Lexer::SetState(LexerState * state)
 	iCurrLexState = state;
 }
 
+void Lexer::InitAnalyseOpChar()
+{
+	assert(_opCharAnalyser.GetCurrOpCharIndex() == 0);
+
+	_opCharAnalyser.SetCurrOpState(_opStates.GetOpState(cCurrChar, 0, 0, 0));
+	_opCharAnalyser.IncCurrOpCharIndex();
+}
+
+bool Lexer::HasNoSubState()
+{
+	return _opCharAnalyser.GetCurrOpState().GetSubStateCount() == 0;
+}
+
+void Lexer::SetNextOpState()
+{
+	_opCharAnalyser.SetCurrOpState(_opStates.GetOpState(cCurrChar, _opCharAnalyser.GetCurrOpCharIndex(), _opCharAnalyser.GetCurrOpState().GetSubStateIndex(), _opCharAnalyser.GetCurrOpState().GetSubStateCount()));
+	_opCharAnalyser.IncCurrOpCharIndex();
+}
+
+void Lexer::ResetCurrOpIndex()
+{
+	_opCharAnalyser.SetCurrOpCharIndex(0);
+}
+
+OpType Lexer::GetCurrOp()
+{
+	return _opCharAnalyser.GetCurrOpType();
+}
+
 void Lexer::CurrLexemeFinish()
 {
 	iAddCurrChar = false;
 	iLexemeDone = true;
+}
+
+void Lexer::AddCurrChar(bool i)
+{
+	iAddCurrChar = i;
 }
 
 void Lexer::SkipWhiteSpace()

@@ -10,8 +10,10 @@
 #include <stdio.h>
 #include <tchar.h>
 
-#include <memory>
 
+#include <cassert>
+#include <memory>
+#include <vector>
 #include <iostream>	
 using namespace std;
 

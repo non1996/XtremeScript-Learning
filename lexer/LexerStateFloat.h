@@ -14,7 +14,7 @@ public:
 	~LexerStateFloat();
 
 	virtual void HandleChar(Lexer* _lexer);
-	virtual Token GetTokenType();
+	virtual Token GetTokenType(Lexer* _lexer);
 
 	static LexerStateFloat* GetInstance();
 };
